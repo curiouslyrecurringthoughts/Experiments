@@ -9,17 +9,15 @@
 #include <iostream>
 #include "TSafeQueue.h"
 
-struct data {
-	static std::atomic<int> s_SequenceCounter;
-	int el{ rand() % 10 };
-	int sequenceCounter = s_SequenceCounter++;
-};
+#include <experimental/coroutine>
 
-std::atomic<int> data::s_SequenceCounter{ 0 };
+struct data {
+	int sequenceCounter{};
+};
 
 std::ostream& operator<<(std::ostream& os, const data& el)
 {
-	os << "data: " << el.el << " seq: " << el.sequenceCounter;
+	os << " seq: " << el.sequenceCounter;
 	return os;
 }
 
@@ -31,7 +29,7 @@ int main()
 	std::thread producer([&queue, &printMutex] (){
 		int i = 0;
 		while (i < 1000) {
-			const data el;
+			const data el{i};
 			{
 				std::lock_guard<std::mutex> guard{ printMutex };
 				std::cout << "Produced " << el << '\n';
