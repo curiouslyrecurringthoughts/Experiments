@@ -52,7 +52,9 @@ int main()
 		[&queue]() {
 			unsigned int i = 0;
 			while(true){
-				queue.push("HELLO" + std::to_string(i++));
+				std::string s = "HELLO" + std::to_string(i++);
+				std::cout << "Produced " << s << '\n';
+				queue.push(std::move(s));
 			}
 		}
 	};

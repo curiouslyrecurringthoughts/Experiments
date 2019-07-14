@@ -41,6 +41,10 @@ public:
 
 	void wakeMeUp(coroHandle coro) {
 		std::lock_guard<std::mutex> guard{ m_mutex };
+		if (!m_queue.empty()) {
+			coro.resume();
+			return;
+		}
 		m_coro = coro;
 	}
 	
