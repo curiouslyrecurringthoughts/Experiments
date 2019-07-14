@@ -1,83 +1,71 @@
-// GeneratorCoRoutines.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include <thread>
 #include <future>
+#include <sstream>
 #include <iostream>
 #include <experimental/coroutine>
+#include <experimental/generator>
 
-class Waiter {
-public:
-	//Neede by Awaitable concept
-	bool await_ready();
-	void await_suspend(std::experimental::coroutine_handle<>);
-	void await_resume();
 
-	//My stuff
-	void SetReady();
-private:
-	std::experimental::coroutine_handle<> m_handle;
+struct Noisy {
+
+	Noisy() { std::cout << "Noisy created - the coroutine frame has been created\n"; }
+
+	~Noisy() { std::cout << "Noisy destroyed - the coroutine frame has been destroyed\n"; }
 };
 
-void Waiter::SetReady()
+class Awaiter {
+public:
+	//Needed by Awaiter concept
+	bool await_ready();
+	void await_suspend(std::experimental::coroutine_handle<>);
+	std::string await_resume();
+
+	//my member function to resume
+	void SetReady(std::string messageFromWorker);
+private:
+	std::experimental::coroutine_handle<> m_handle;
+	std::string message;
+};
+
+void Awaiter::SetReady(std::string messageFromWorker)
 {
 	std::cout << "SET READY!\n";
+	message = std::move(messageFromWorker);
 	if (m_handle)
 		m_handle.resume();
 }
 
-bool Waiter::await_ready()
+bool Awaiter::await_ready()
 {
 	return false;
 }
 
-void Waiter::await_suspend(std::experimental::coroutine_handle<> handle)
+void Awaiter::await_suspend(std::experimental::coroutine_handle<> handle)
 {
 	m_handle = std::move(handle);
 }
 
-void Waiter::await_resume()
+std::string Awaiter::await_resume()
 {
-	std::cout << "I am DONE Waiting! \n";
+	std::cout << "I am DONE Waiting!\n";
+
+	return  "DONE!!!!, message = " + message;
 }
 
-using task = std::future<void>;
+Awaiter awaiter;
 
-/*
-struct task {
-	struct promise_type;
+std::future<std::string> coRoutine() {
 
-	using handle = std::experimental::coroutine_handle<promise_type>;
-
-	struct promise_type {
-		auto get_return_object() { return task{ handle::from_promise(*this) }; }
-		void return_void() { }
-		void result() {}
-		auto initial_suspend() { return std::experimental::suspend_never{}; }
-		auto final_suspend() { return std::experimental::suspend_never{}; }
-	};
-
-	task(handle h) : coro(h) {}
-
-	void get() { coro.promise().return_void(); }
-
-private:
-	handle coro;
-};
-*/
-
-Waiter waiter;
-
-task func() {
-
-	std::cout << "Func()\n";
+	Noisy n{};
+	std::cout << "coRoutine()\n";
 
 	std::cout << "about to await!\n";
 
-	co_await waiter;
+	std::string s = co_await awaiter;
 
 	std::cout << "co await passed!\n";
 
+	co_return s;
 }
 
 int main()
@@ -86,20 +74,21 @@ int main()
 	{
 		[]()
 		{
-			std::cout << "About to set sleep\n";
+			std::cout << "About to sleep\n";
 			std::this_thread::sleep_for(std::chrono::duration<int>(3));
 			std::cout << "About to set ready\n";
-			waiter.SetReady();
+			awaiter.SetReady("Message from Worker");
 		}
 	};
 
 
-	std::cout << "About to func()\n";
-	auto a = func();
-	a.get();
-
+	std::cout << "About to call coRoutine()\n";
+	std::future<std::string> a = coRoutine();
+	std::cout << "Main do something longish\n";
+	std::this_thread::sleep_for(std::chrono::duration<int>(1));
+	std::cout << "Main done doing something longish, waiting for co-routine to be done\n";
+	std::string s = a.get();
 	t.join();
-	std::cout << "after join!\n";
+	std::cout << "after join, result = "<< s << "!\n";
 
 }
-
