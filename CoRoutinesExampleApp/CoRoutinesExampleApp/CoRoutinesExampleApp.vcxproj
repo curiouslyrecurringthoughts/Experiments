@@ -161,9 +161,6 @@
   <ItemGroup>
     <ClCompile Include="CoRoutinesExampleApp.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="WorkerQueue.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
