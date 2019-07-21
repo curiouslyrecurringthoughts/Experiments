@@ -98,5 +98,5 @@ int main()
 	
 	Worker::getInstance().run();
 
-	std::cout << f1.get() << " " << f2.get() << " " << f3.get() << '\n';
+	std::cout << "RESULTS " << f1.get() << " " << f2.get() << " " << f3.get() << '\n';
 }
