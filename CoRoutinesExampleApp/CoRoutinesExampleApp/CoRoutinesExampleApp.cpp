@@ -8,7 +8,6 @@
 #include <utility>
 #include <experimental/coroutine>
 
-
 class Worker {
 
 public:
@@ -49,7 +48,6 @@ public:
 	
 	Awaiter(int data) : data(data) {}
 
-	//Needed by Awaiter concept
 	bool await_ready()
 	{
 		return false;
