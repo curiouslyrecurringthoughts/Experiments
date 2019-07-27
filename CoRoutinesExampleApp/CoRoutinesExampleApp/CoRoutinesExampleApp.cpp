@@ -26,7 +26,6 @@ public:
 	int veryComplexDataGeneration(int inputData) { return std::rand() % 10 + inputData; }
 
 	void run() {
-		unsigned int i = 0;
 		while (!m_suspendedCoros.empty()) {
 			auto [coro, inputData]= m_suspendedCoros.front();
 			m_suspendedCoros.pop();
