@@ -46,7 +46,7 @@ private:
 class Awaiter {
 public:
 	
-	Awaiter(int data) : data(data) {}
+	Awaiter(int inData) : inData(inData) {}
 
 	bool await_ready()
 	{
@@ -55,7 +55,7 @@ public:
 
 	void await_suspend(std::experimental::coroutine_handle<> handle)
 	{
-		Worker::getInstance().suspend(handle, data);
+		Worker::getInstance().suspend(handle, inData);
 	}
 
 	int await_resume()
@@ -64,20 +64,10 @@ public:
 	}
 
 private:
-	int data;
-};
-
-struct noisy {
-
-	noisy(const std::string& name) : m_name{name} { std::cout << "noisy for coroutine " << m_name << " created\n"; }
-	~noisy() { { std::cout << "noisy for coroutine " << m_name << " destroyed\n"; } }
-
-	std::string m_name;
+	int inData;
 };
 
 std::future<int> coRoutine(std::string name){
-
-	noisy ns{ name };
 
 	int sum = 0;
 	while (sum < 20) {
