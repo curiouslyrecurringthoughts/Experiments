@@ -74,17 +74,21 @@ struct noisy {
 
 
 struct task {
+
 	struct promise_type;
 
 	using handle = std::experimental::coroutine_handle<promise_type>;
 
 	struct promise_type {
+
 		auto get_return_object() { return task{ handle::from_promise(*this) }; }
 		void return_value(int value) { m_value = value; }
-		int result() { return m_value; }
 		auto initial_suspend() { return std::experimental::suspend_never{}; }
 		auto final_suspend() { return std::experimental::suspend_always{}; }
+
 		int m_value{ 0 };
+
+		//Part needed to think about lifetime, ignore
 		static inline int s_instance_id = 0;
 		noisy n{ "promise " + std::to_string(++s_instance_id) };
 	};
@@ -93,15 +97,23 @@ struct task {
 
 
 	int get() {
-		auto res = coro.promise().result();
-		coro.destroy();
-		return res;
+		return coro.promise().m_value;
 	}
+
+	~task() {
+		if (coro)
+			coro.destroy();
+	}
+
+	task(task const&) = delete;
+	task(task &&) = delete;
+
+	task& operator=(task&&);
+	task& operator=(task const&);
 
 private:
 	handle coro;
 };
-
 
 task coRoutine(std::string name) {
 
