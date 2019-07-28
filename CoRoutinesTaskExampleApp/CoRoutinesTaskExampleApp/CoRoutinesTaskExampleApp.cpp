@@ -77,6 +77,14 @@ struct task {
 
 	struct promise_type;
 
+
+	task(task const&) = delete;
+	task(task&&) = delete;
+
+	task& operator=(task&&) = delete;
+	task& operator=(task const&) = delete;
+
+	//std::coroutine_handle<promise_type> in the future
 	using handle = std::experimental::coroutine_handle<promise_type>;
 
 	struct promise_type {
@@ -104,12 +112,6 @@ struct task {
 		if (coro)
 			coro.destroy();
 	}
-
-	task(task const&) = delete;
-	task(task &&) = delete;
-
-	task& operator=(task&&);
-	task& operator=(task const&);
 
 private:
 	handle coro;
