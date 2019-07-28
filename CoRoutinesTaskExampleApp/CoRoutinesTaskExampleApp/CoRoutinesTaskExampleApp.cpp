@@ -77,7 +77,6 @@ struct task {
 
 	struct promise_type;
 
-
 	task(task const&) = delete;
 	task(task&&) = delete;
 
@@ -89,10 +88,21 @@ struct task {
 
 	struct promise_type {
 
-		auto get_return_object() { return task{ handle::from_promise(*this) }; }
-		void return_value(int value) { m_value = value; }
-		auto initial_suspend() { return std::experimental::suspend_never{}; }
-		auto final_suspend() { return std::experimental::suspend_always{}; }
+		auto get_return_object() { 
+			return task{ handle::from_promise(*this) }; 
+		}
+		
+		void return_value(int value) { 
+			m_value = value; 
+		}
+
+		auto initial_suspend() { 
+			return std::experimental::suspend_never{}; 
+		}
+		
+		auto final_suspend() { 
+			return std::experimental::suspend_always{}; 
+		}
 
 		int m_value{ 0 };
 
@@ -102,7 +112,6 @@ struct task {
 	};
 
 	task(handle h) : coro(h) {}
-
 
 	int get() {
 		return coro.promise().m_value;
