@@ -71,6 +71,10 @@ struct int_generator {
 			return *this;
 		}
 
+		const int& operator*() const {
+			return coro.promise().m_value;
+		}
+
 		bool operator==(const iterator& other) const {
 			return coro == other.coro;
 		}
@@ -79,9 +83,6 @@ struct int_generator {
 			return !(operator==(other));
 		}
 
-		int operator*() const {
-			return coro.promise().m_value;
-		}
 	};
 
 	iterator begin() { iterator it{ coro }; ++it; return it; }
