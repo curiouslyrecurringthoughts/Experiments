@@ -60,13 +60,32 @@ struct int_generator {
 			coro.destroy();
 	}
 
-	bool next() {
-		if (!coro)
-			return false;
+	struct iterator {
 
-		coro.resume();
-		return !coro.done();
-	}
+		handle coro;
+
+		iterator& operator++() {
+			coro.resume();
+			if (coro.done())
+				coro = nullptr;
+			return *this;
+		}
+
+		bool operator==(const iterator& other) const {
+			return coro == other.coro;
+		}
+
+		bool operator!=(const iterator& other) const {
+			return !(operator==(other));
+		}
+
+		int operator*() const {
+			return coro.promise().m_value;
+		}
+	};
+
+	iterator begin() { iterator it{ coro }; ++it; return it; }
+	iterator end() { return iterator{ nullptr }; }
 
 private:
 	handle coro;
@@ -91,9 +110,9 @@ int main()
 {
 
 	auto coro = rand_numbers(10);
-
-	while (coro.next()) {
-		std::cout << coro.get() << std::endl;
+	
+	for (auto el : coro) {
+		std::cout << el << std::endl;
 	}
 
 }
