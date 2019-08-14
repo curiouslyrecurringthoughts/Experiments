@@ -60,11 +60,6 @@ struct int_generator {
 			coro.destroy();
 	}
 
-	bool done() {
-		if (!coro) return false;
-		return coro.done();
-	}
-
 	bool next() {
 		if (!coro)
 			return false;
