@@ -88,9 +88,15 @@ int main(){
 	date::year_month_day ymd2020Overflow = overflowIntoNextMonth(ymd2020);
 	std::cout << "Overflow to next month " << ymd2020Overflow << '\n';
 
+	//constexpr
 	constexpr date::year_month_day dyw_last_constexpr = 2019_y / 8 / last;
 	constexpr auto has_31_days = dyw_last_constexpr.day() == date::day{ 31 };
 	static_assert(has_31_days, "No");
+
+	using namespace std::chrono_literals;
+
+	constexpr auto tp = date::sys_days{ 1970_y / 1 / 3_d } + 7h;
+	static_assert(tp.time_since_epoch() == std::chrono::hours{ 7 + 24 * 2 }, "NO2");
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
